@@ -19,7 +19,6 @@ app.post('/api/download', async (req, res) => {
         url: 'https://tiktok-video-downloader-api.p.rapidapi.com/media',
         params: { videoUrl: videoUrl },
         headers: {
-            // Kita menggunakan Environment Variable agar API Key tidak bocor di GitHub
             'x-rapidapi-key': process.env.RAPIDAPI_KEY, 
             'x-rapidapi-host': 'tiktok-video-downloader-api.p.rapidapi.com',
         },
@@ -33,12 +32,15 @@ app.post('/api/download', async (req, res) => {
             throw new Error('Gagal mendapatkan URL unduhan dari API');
         }
 
-        res.json({ success: true, downloadUrl });
+        return res.json({ success: true, downloadUrl });
     } catch (error) {
         console.error('Error:', error.message);
-        res.status(500).json({ error: 'Gagal memproses video. Pastikan URL benar.' });
+        // Pastikan mengembalikan JSON, bukan text agar tidak memicu error token 'A' lagi
+        return res.status(500).json({ error: error.message || 'Gagal memproses video.' });
     }
 });
 
-// Export app agar bisa dibaca oleh Vercel Serverless
-module.exports = app;
+// Wrapper wajib untuk Vercel Serverless Function
+module.exports = (req, res) => {
+    return app(req, res);
+};
