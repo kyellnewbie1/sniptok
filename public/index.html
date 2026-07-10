@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sniptok - TikTok Downloader No Watermark</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, #0d1b2a 0%, #000814 100%);
+        }
+        /* Efek Glow / Bling-bling */
+        .glow-text {
+            text-shadow: 0 0 10px rgba(0, 180, 216, 0.8), 0 0 20px rgba(0, 180, 216, 0.4);
+        }
+        .glow-box {
+            box-shadow: 0 0 25px rgba(0, 180, 216, 0.2);
+            border: 1px solid rgba(0, 180, 216, 0.3);
+        }
+        .glow-button {
+            box-shadow: 0 0 15px rgba(0, 180, 216, 0.6);
+            transition: all 0.3s ease;
+        }
+        .glow-button:hover {
+            box-shadow: 0 0 25px rgba(0, 180, 216, 0.9);
+            transform: scale(1.02);
+        }
+        /* Animasi Background Bergerak halus */
+        .bg-animate {
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <nav class="p-6 flex justify-between items-center max-w-6xl mx-auto w-full transition duration-500 opacity-0 animate-[fadeIn_1s_ease-out_forwards]">
+        <div class="flex items-center space-x-2">
+            <i class="fab fa-tiktok text-3xl text-blue-400 drop-shadow-[0_0_8px_rgba(0,180,216,0.8)]"></i>
+            <span class="text-2xl font-extrabold tracking-wider bg-gradient-to-r from-white via-blue-400 to-blue-600 bg-clip-text text-transparent">SnipTok</span>
+        </div>
+        <div class="text-sm text-gray-400 hover:text-blue-400 transition cursor-pointer">
+            <i class="fas fa-shield-alt mr-1"></i> Aman & Cepat
+        </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col items-center justify-center px-4 py-12">
+        <div class="text-center max-w-2xl w-full">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 animate-[slideDown_0.8s_ease-out]">
+                TikTok Video <span class="text-blue-400 glow-text">Downloader</span>
+            </h1>
+            <p class="text-gray-400 text-base md:text-lg mb-8 animate-[slideDown_1s_ease-out] delay-100">
+                Unduh video TikTok favoritmu tanpa watermark. Cepat, gratis, kualitas HD.
+            </p>
+
+            <div class="glow-box bg-black/60 backdrop-blur-md p-6 rounded-2xl w-full mb-8 transition duration-500 animate-[zoomIn_0.6s_ease-out]">
+                <form id="downloadForm" class="flex flex-col md:flex-row gap-3">
+                    <div class="relative flex-grow">
+                        <i class="fas fa-link absolute left-4 top-4.5 text-gray-500"></i>
+                        <input 
+                            type="url" 
+                            id="videoUrl" 
+                            placeholder="Tempel tautan video TikTok di sini..." 
+                            required
+                            class="w-full bg-neutral-900/80 border border-neutral-800 text-white pl-12 pr-4 py-4 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition duration-300 placeholder-gray-500 text-sm md:text-base"
+                        >
+                    </div>
+                    <button 
+                        type="submit" 
+                        class="glow-button bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-400 hover:to-blue-600 text-white font-semibold px-8 py-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+                    >
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                </form>
+
+                <div id="loading" class="hidden mt-6 flex flex-col items-center justify-center space-y-3 animate-pulse">
+                    <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-blue-400 text-sm">Sedang mengambil video, tunggu sebentar...</p>
+                </div>
+
+                <div id="resultBox" class="hidden mt-6 p-4 bg-neutral-900/90 border border-emerald-500/30 rounded-xl animate-[fadeIn_0.5s_ease-out]">
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center text-2xl">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <p class="text-emerald-400 font-medium mb-3">Video Berhasil Diproses!</p>
+                            <a 
+                                id="downloadBtn" 
+                                href="#" 
+                                target="_blank"
+                                class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-black font-bold px-6 py-3 rounded-xl transition duration-300 shadow-lg shadow-emerald-500/20"
+                            >
+                                <i class="fas fa-file-video"></i> Simpan Video (No Watermark)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="errorBox" class="hidden mt-6 p-4 bg-red-900/20 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-center gap-2 justify-center">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="errorMessage">Terjadi kesalahan. Silakan coba lagi.</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="p-6 text-center text-xs text-gray-600 border-t border-neutral-900 w-full">
+        &copy; 2026 <span class="text-blue-500 font-semibold">SnipTok</span>. Dibuat dengan penuh gaya.
+    </footer>
+
+    <script>
+        document.getElementById('downloadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const videoUrl = document.getElementById('videoUrl').value;
+            const loading = document.getElementById('loading');
+            const resultBox = document.getElementById('resultBox');
+            const errorBox = document.getElementById('errorBox');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            // Reset view state
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+            errorBox.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ videoUrl })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.downloadUrl) {
+                    downloadBtn.href = data.downloadUrl;
+                    resultBox.classList.remove('hidden');
+                } else {
+                    throw new Error(data.error || 'Gagal memproses link.');
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').innerText = error.message;
+                errorBox.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
