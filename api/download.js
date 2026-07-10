@@ -1,45 +1,33 @@
 const axios = require('axios');
 
 module.exports = async (req, res) => {
-    // Mengatasi CORS agar bisa diakses oleh frontend
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+    // Vercel Serverless menggunakan method POST
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method tidak diizinkan' });
     }
 
-    const { url } = req.query;
-
-    if (!url) {
-        return res.status(400).json({ error: 'URL TikTok wajib diisi!' });
-    }
+    const { tiktokUrl } = req.body;
 
     try {
-        // Menggunakan API tikwm untuk mengambil data video
-        const response = await axios.post('https://www.tikwm.com/api/', {
-            url: url
+        const response = await axios.post('https://api.geekflare.com/webscraping', {
+            device: "desktop",
+            format: ["json"],
+            renderJS: true, // Ingat: ini membuat request jadi agak lama
+            blockAds: true,
+            stealth: true,
+            url: `https://snaptik.app/ID2` 
+        }, {
+            headers: {
+                'x-api-key': process.env.GEEKFLARE_API_KEY, // Menggunakan Environment Variable agar aman
+                'Content-Type': 'application/json'
+            }
         });
 
-        const data = response.data;
+        // Contoh link video hasil parsing (sesuaikan dengan output asli Geekflare)
+        const videoDownloadUrl = "https://server-snaptik.com/video.mp4"; 
 
-        if (data.code === 0) {
-            // Mengembalikan data bersih ke frontend
-            return res.status(200).json({
-                success: true,
-                title: data.data.title,
-                author: data.data.author.nickname,
-                cover: 'https://www.tikwm.com' + data.data.cover,
-                wm_video: 'https://www.tikwm.com' + data.data.wmplay, // dengan watermark
-                nowm_video: 'https://www.tikwm.com' + data.data.play, // TANPA watermark
-                music: 'https://www.tikwm.com' + data.data.music
-            });
-        } else {
-            return res.status(400).json({ error: data.msg || 'Gagal mengambil video. Pastikan URL valid.' });
-        }
-
+        res.status(200).json({ success: true, downloadUrl: videoDownloadUrl });
     } catch (error) {
-        return res.status(500).json({ error: 'Terjadi kesalahan pada server.' });
+        res.status(500).json({ error: 'Gagal memproses video atau waktu habis.' });
     }
 };
