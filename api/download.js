@@ -1,46 +1,45 @@
-const express = require('express');
 const axios = require('axios');
-const cors = require('cors');
 
-const app = express();
+module.exports = async (req, res) => {
+    // Mengatasi CORS agar bisa diakses oleh frontend
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-app.use(cors());
-app.use(express.json());
-
-app.post('/api/download', async (req, res) => {
-    const { videoUrl } = req.body;
-
-    if (!videoUrl) {
-        return res.status(400).json({ error: 'URL video tidak boleh kosong' });
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
     }
 
-    const options = {
-        method: 'GET',
-        url: 'https://tiktok-video-downloader-api.p.rapidapi.com/media',
-        params: { videoUrl: videoUrl },
-        headers: {
-            'x-rapidapi-key': process.env.RAPIDAPI_KEY, 
-            'x-rapidapi-host': 'tiktok-video-downloader-api.p.rapidapi.com',
-        },
-    };
+    const { url } = req.query;
+
+    if (!url) {
+        return res.status(400).json({ error: 'URL TikTok wajib diisi!' });
+    }
 
     try {
-        const response = await axios.request(options);
-        const downloadUrl = response.data.downloadUrl || response.data.url || response.data.result?.download_url; 
-        
-        if (!downloadUrl) {
-            throw new Error('Gagal mendapatkan URL unduhan dari API');
+        // Menggunakan API tikwm untuk mengambil data video
+        const response = await axios.post('https://www.tikwm.com/api/', {
+            url: url
+        });
+
+        const data = response.data;
+
+        if (data.code === 0) {
+            // Mengembalikan data bersih ke frontend
+            return res.status(200).json({
+                success: true,
+                title: data.data.title,
+                author: data.data.author.nickname,
+                cover: 'https://www.tikwm.com' + data.data.cover,
+                wm_video: 'https://www.tikwm.com' + data.data.wmplay, // dengan watermark
+                nowm_video: 'https://www.tikwm.com' + data.data.play, // TANPA watermark
+                music: 'https://www.tikwm.com' + data.data.music
+            });
+        } else {
+            return res.status(400).json({ error: data.msg || 'Gagal mengambil video. Pastikan URL valid.' });
         }
 
-        return res.json({ success: true, downloadUrl });
     } catch (error) {
-        console.error('Error:', error.message);
-        // Pastikan mengembalikan JSON, bukan text agar tidak memicu error token 'A' lagi
-        return res.status(500).json({ error: error.message || 'Gagal memproses video.' });
+        return res.status(500).json({ error: 'Terjadi kesalahan pada server.' });
     }
-});
-
-// Wrapper wajib untuk Vercel Serverless Function
-module.exports = (req, res) => {
-    return app(req, res);
 };
